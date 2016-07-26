@@ -219,6 +219,29 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testLoadExternalXCollection() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/vendor-extensions-references/b.yaml");
+        Map<String, Model> definitions = swagger.getDefinitions();
+        assertTrue(definitions.containsKey("x"));
+        assertTrue(!definitions.containsKey("y"));
+        assertTrue(definitions.containsKey("z"));
+        assertEquals(((Map<String, Object>) definitions.get("u").getVendorExtensions().get("x-collection")).get("schema"), "#/definitions/t");
+    }
+
+    @Test
+    public void testLoadExternalXLinks() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/vendor-extensions-references/b.yaml");
+        Map<String, Model> definitions = swagger.getDefinitions();
+        assertTrue(definitions.containsKey("n"));
+        assertTrue(!definitions.containsKey("m"));
+        assertTrue(definitions.containsKey("p"));
+        assertTrue(definitions.containsKey("r"));
+        assertEquals(((Map<String, Map<String, Object>>) definitions.get("n").getVendorExtensions().get("x-links")).get("q").get("schema"), "#/definitions/r");
+    }
+
+    @Test
     public void testIssue75() {
         SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read("src/test/resources/issue99.json");

@@ -5,7 +5,9 @@ import io.swagger.models.RefModel;
 import io.swagger.models.Swagger;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
+import io.swagger.models.refs.GenericRef;
 import io.swagger.models.refs.RefFormat;
+import io.swagger.models.refs.RefType;
 import io.swagger.parser.ResolverCache;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +54,7 @@ public final class ExternalRefProcessor {
         String file = $ref.split("#/")[0];
         if (model instanceof RefModel) {
             RefModel refModel = (RefModel) model;
-            if(isAnExternalRefFormat(refModel.getRefFormat())) {
+            if (isAnExternalRefFormat(refModel.getRefFormat())) {
                 refModel.set$ref(processRefToExternalDefinition(refModel.get$ref(), refModel.getRefFormat()));
             } else {
                 processRefToExternalDefinition(file + refModel.get$ref(), RefFormat.RELATIVE);
@@ -60,12 +62,12 @@ public final class ExternalRefProcessor {
         }
         //Loop the properties and recursively call this method;
         Map<String, Property> subProps = model.getProperties();
-        if(subProps != null) {
+        if (subProps != null) {
             for (Map.Entry<String, Property> prop : subProps.entrySet()) {
                 if (prop.getValue() instanceof RefProperty) {
                     RefProperty subRef = (RefProperty) prop.getValue();
 
-                    if(isAnExternalRefFormat(subRef.getRefFormat())) {
+                    if (isAnExternalRefFormat(subRef.getRefFormat())) {
                         subRef.set$ref(processRefToExternalDefinition(subRef.get$ref(), subRef.getRefFormat()));
                     } else {
                         processRefToExternalDefinition(file + subRef.get$ref(), RefFormat.RELATIVE);
@@ -73,8 +75,36 @@ public final class ExternalRefProcessor {
                 }
             }
         }
+        Map<String, Object> vendorExtensions = model.getVendorExtensions();
+        if (vendorExtensions != null) {
+            if (vendorExtensions.containsKey("x-collection")) {
+                Map<String, Object> xCollection = (Map<String, Object>) vendorExtensions.get("x-collection");
+                String sub$ref = (String) xCollection.get("schema");
+                GenericRef subRef = new GenericRef(RefType.DEFINITION, sub$ref);
+                if (isAnExternalRefFormat(subRef.getFormat())) {
+                    xCollection.put("schema", "#/definitions/" + processRefToExternalDefinition(subRef.getRef(), subRef.getFormat()));
+                } else {
+                    processRefToExternalDefinition(file + subRef.getRef(), RefFormat.RELATIVE);
+                }
+            }
+            if (vendorExtensions.containsKey("x-links")) {
+                Map<String, Object> xLinks = (Map<String, Object>) vendorExtensions.get("x-links");
+                for (Map.Entry<String, Object> xLinkEntry : xLinks.entrySet()) {
+                    Map<String, Object> xLink = (Map<String, Object>) xLinkEntry.getValue();
+                    String sub$ref = (String) xLink.get("schema");
+                    GenericRef subRef = new GenericRef(RefType.DEFINITION, sub$ref);
+                    if (isAnExternalRefFormat(subRef.getFormat())) {
+                        xLink.put("schema", "#/definitions/" + processRefToExternalDefinition(subRef.getRef(), subRef.getFormat()));
+                    } else {
+                        processRefToExternalDefinition(file + subRef.getRef(), RefFormat.RELATIVE);
+                    }
+                }
+            }
+        }
         if(existingModel == null) {
             // don't overwrite existing model reference
+            if (vendorExtensions != null)
+                vendorExtensions.put("x-pointer", $ref);
             swagger.addDefinition(newRef, model);
         }
 
