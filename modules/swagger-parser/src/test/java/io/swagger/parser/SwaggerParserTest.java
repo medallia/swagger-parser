@@ -1,5 +1,6 @@
 package io.swagger.parser;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.models.*;
 import io.swagger.models.parameters.*;
 import io.swagger.models.properties.ArrayProperty;
@@ -239,6 +240,24 @@ public class SwaggerParserTest {
         assertTrue(definitions.containsKey("p"));
         assertTrue(definitions.containsKey("r"));
         assertEquals(((Map<String, Map<String, Object>>) definitions.get("n").getVendorExtensions().get("x-links")).get("q").get("schema"), "#/definitions/r");
+    }
+
+    @Test
+    public void testLoadXCollectionToExternalDef() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/vendor-extensions-references/a.yaml");
+        Map<String, Model> definitions = swagger.getDefinitions();
+        assertTrue(definitions.containsKey("t"));
+        assertEquals(((ObjectNode) definitions.get("s").getVendorExtensions().get("x-collection")).get("schema").asText(), "#/definitions/t");
+    }
+
+    @Test
+    public void testLoadXLinksToExternalDef() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/vendor-extensions-references/a.yaml");
+        Map<String, Model> definitions = swagger.getDefinitions();
+        assertTrue(definitions.containsKey("r"));
+        assertEquals(((ObjectNode) definitions.get("m").getVendorExtensions().get("x-links")).get("q").get("schema").asText(), "#/definitions/r");
     }
 
     @Test
