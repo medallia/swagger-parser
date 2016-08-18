@@ -2,6 +2,7 @@ package io.swagger.parser;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.swagger.exception.RefException;
 import io.swagger.models.Model;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
@@ -66,6 +67,15 @@ public class ResolverCache {
     }
 
     public <T> T loadRef(String ref, RefFormat refFormat, Class<T> expectedType) {
+        T r = loadReference(ref, refFormat, expectedType);
+        if (r != null) {
+            return r;
+        } else {
+            throw new RefException(ref);
+        }
+    }
+
+    private <T> T loadReference(String ref, RefFormat refFormat, Class<T> expectedType) {
         if (refFormat == RefFormat.INTERNAL) {
             //we don't need to go get anything for internal refs
             return expectedType.cast(loadInternalRef(ref));
@@ -115,7 +125,7 @@ public class ResolverCache {
             tree = tree.get(jsonPathElement);
             //if at any point we do find an element we expect, print and error and abort
             if (tree == null) {
-                throw new RuntimeException("Could not find " + definitionPath + " in contents of " + file);
+                throw new RefException(definitionPath, file);
             }
         }
 
@@ -129,6 +139,12 @@ public class ResolverCache {
         resolutionCache.put(ref, result);
 
         return result;
+    }
+
+    public void checkInternalRef(String ref) {
+        if (loadInternalRef(ref) == null) {
+            throw new RefException(ref);
+        }
     }
 
     private Object loadInternalRef(String ref) {
