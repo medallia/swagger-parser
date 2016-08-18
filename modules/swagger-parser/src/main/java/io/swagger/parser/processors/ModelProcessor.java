@@ -1,10 +1,5 @@
 package io.swagger.parser.processors;
 
-import static io.swagger.parser.util.RefUtils.isAnExternalRefFormat;
-
-import java.util.List;
-import java.util.Map;
-
 import io.swagger.models.ArrayModel;
 import io.swagger.models.ComposedModel;
 import io.swagger.models.Model;
@@ -14,6 +9,10 @@ import io.swagger.models.Swagger;
 import io.swagger.models.properties.Property;
 import io.swagger.parser.ResolverCache;
 
+import java.util.List;
+import java.util.Map;
+
+import static io.swagger.parser.util.RefUtils.isAnExternalRefFormat;
 
 public class ModelProcessor {
     private final PropertyProcessor propertyProcessor;

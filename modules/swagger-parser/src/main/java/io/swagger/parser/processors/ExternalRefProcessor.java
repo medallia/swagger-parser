@@ -1,13 +1,5 @@
 package io.swagger.parser.processors;
 
-import static io.swagger.parser.util.RefUtils.computeDefinitionName;
-import static io.swagger.parser.util.RefUtils.isAnExternalRefFormat;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import org.slf4j.LoggerFactory;
-
 import io.swagger.models.ArrayModel;
 import io.swagger.models.Model;
 import io.swagger.models.RefModel;
@@ -18,6 +10,13 @@ import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.refs.RefFormat;
 import io.swagger.parser.ResolverCache;
+import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static io.swagger.parser.util.RefUtils.computeDefinitionName;
+import static io.swagger.parser.util.RefUtils.isAnExternalRefFormat;
 
 public final class ExternalRefProcessor {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ExternalRefProcessor.class);
@@ -27,7 +26,7 @@ public final class ExternalRefProcessor {
     
     private VendorExtensionProcessor vendorExtensionProcessor;
 
-	public ExternalRefProcessor(ResolverCache cache, Swagger swagger) {
+    public ExternalRefProcessor(ResolverCache cache, Swagger swagger) {
         this.cache = cache;
         this.swagger = swagger;
         this.vendorExtensionProcessor = new VendorExtensionProcessor(cache, this);
