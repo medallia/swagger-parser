@@ -10,7 +10,8 @@ definitions:
   y:
     type: object
     x-collection:
-      schema: "#/definitions/z"
+      schema: 
+        $ref: "#/definitions/z"
   z:
     type: object
     properties:
@@ -20,9 +21,11 @@ definitions:
     type: object
     x-links:
       o:
-        schema: "#/definitions/p"
+        schema: 
+          $ref: "#/definitions/p"
       q:
-        schema: "./b.yaml#/definitions/r"
+        schema: 
+          $ref: "./b.yaml#/definitions/r"
   p:
     type: object
     properties:
@@ -31,4 +34,5 @@ definitions:
   s:
     type: object
     x-collection:
-      schema: "./b.yaml#/definitions/t"
+      schema: 
+        $ref: "./b.yaml#/definitions/t"
