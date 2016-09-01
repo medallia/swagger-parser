@@ -42,7 +42,6 @@ public class SwaggerResolver {
         }
 
         pathProcessor.processPaths();
-        definitionsProcessor.processDefinitions();
 
         if(swagger.getPaths() != null) {
             for(String pathname : swagger.getPaths().keySet()) {
@@ -63,6 +62,8 @@ public class SwaggerResolver {
                 }
             }
         }
+
+        definitionsProcessor.processDefinitions();
 
         return swagger;
     }
