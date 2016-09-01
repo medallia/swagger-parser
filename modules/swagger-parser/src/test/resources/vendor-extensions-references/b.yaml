@@ -8,11 +8,11 @@ responses:
   200:
     description: "Good response"
     schema:
-      $ref: "#/definitions/r"
+      $ref: "#/definitions/e"
   500:
     description: "Bad response"
     schema:
-      $ref: "#/definitions/t"
+      $ref: "#/definitions/e"
 
 paths: {}
 definitions:
@@ -32,3 +32,8 @@ definitions:
         type: string
   u:
     $ref: "./a.yaml#/definitions/s"
+  e:
+    type: object
+    properties:
+      name:
+        type: string

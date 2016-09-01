@@ -9,12 +9,15 @@ import io.swagger.models.auth.*;
 import io.swagger.models.parameters.*;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.PropertyBuilder;
+import io.swagger.models.refs.GenericRef;
 import io.swagger.models.refs.RefFormat;
+import io.swagger.models.refs.RefType;
 import io.swagger.util.Json;
 
 import java.util.*;
 
 import static io.swagger.models.properties.PropertyBuilder.PropertyId.*;
+import static io.swagger.parser.util.RefUtils.isAnExternalRefFormat;
 
 public class SwaggerDeserializer {
     static Set<String> ROOT_KEYS = new HashSet<String>(Arrays.asList("swagger", "info", "host", "basePath", "schemes", "consumes", "produces", "paths", "definitions", "parameters", "responses", "securityDefinitions", "security", "tags", "externalDocs"));
@@ -1370,9 +1373,26 @@ public class SwaggerDeserializer {
         return on;
     }
 
+    private void changeInternalRefsToRelative(ObjectNode node, String file) {
+        if (node != null && node.has("$ref")) {
+            String $ref = node.get("$ref").asText();
+            GenericRef ref = new GenericRef(RefType.DEFINITION, $ref);
+            if (ref.getFormat() == RefFormat.INTERNAL) {
+                node.put("$ref", file + $ref);
+            }
+        }
+        Iterator<JsonNode> it = node.iterator();
+        while (it.hasNext()) {
+            JsonNode child = it.next();
+            if (child.getNodeType().equals(JsonNodeType.OBJECT)) {
+                changeInternalRefsToRelative((ObjectNode) child, file);
+            }
+        }
+    }
+
     public ObjectNode getRootObject(String key, ObjectNode node, boolean required, String location, ParseResult result, String parentFileLocation) {
         ObjectNode on = getObject(key, node, required, location, result);
-        while (on != null && on.get("$ref") != null) {
+        while (on != null && on.has("$ref")) {
             String ref = on.get("$ref").asText();
             String[] refParts = ref.split("#/");
             String file = refParts[0];
@@ -1393,6 +1413,7 @@ public class SwaggerDeserializer {
                     }
                 }
                 on = DeserializationUtils.deserialize(tree, file, ObjectNode.class);
+                changeInternalRefsToRelative(on, file);
             }
         }
         return on;

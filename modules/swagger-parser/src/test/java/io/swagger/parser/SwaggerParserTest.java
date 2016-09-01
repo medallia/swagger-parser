@@ -300,23 +300,18 @@ public class SwaggerParserTest {
         assertNotNull(responses.get("200"));
         assertEquals(responses.get("200").getDescription(), "Good response");
         assertEquals(responses.get("200").getSchema().getType(), "ref");
-        assertEquals(((RefProperty)responses.get("200").getSchema()).get$ref(), "#/definitions/r");
+        assertEquals(((RefProperty)responses.get("200").getSchema()).get$ref(), "#/definitions/e");
 
         assertNotNull(responses.get("500"));
         assertEquals(responses.get("500").getDescription(), "Bad response");
         assertEquals(responses.get("500").getSchema().getType(), "ref");
-        assertEquals(((RefProperty)responses.get("500").getSchema()).get$ref(), "#/definitions/t");
+        assertEquals(((RefProperty)responses.get("500").getSchema()).get$ref(), "#/definitions/e");
 
         Map<String, Model> definitions = swagger.getDefinitions();
 
-        assertNotNull(definitions.get("r"));
-        assertNotNull(definitions.get("r").getVendorExtensions().get("x-pointer"));
-        assertEquals(definitions.get("r").getVendorExtensions().get("x-pointer"), "./b.yaml#/definitions/r");
-
-        assertNotNull(definitions.get("t"));
-        assertNotNull(definitions.get("t").getVendorExtensions().get("x-pointer"));
-        assertEquals(definitions.get("t").getVendorExtensions().get("x-pointer"), "./b.yaml#/definitions/t");
-
+        assertNotNull(definitions.get("e"));
+        assertNotNull(definitions.get("e").getVendorExtensions().get("x-pointer"));
+        assertEquals(definitions.get("e").getVendorExtensions().get("x-pointer"), "./b.yaml#/definitions/e");
     }
 
     @Test
