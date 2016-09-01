@@ -41,7 +41,17 @@ public class SwaggerResolver {
             return null;
         }
 
+        if(swagger.getResponses() != null) {
+            for(String responseCode : swagger.getResponses().keySet()) {
+                Response response = swagger.getResponses().get(responseCode);
+                if(response.getSchema() != null) {
+                    propertyProcessor.processProperty(response.getSchema());
+                }
+            }
+        }
+
         pathProcessor.processPaths();
+        definitionsProcessor.processDefinitions();
 
         if(swagger.getPaths() != null) {
             for(String pathname : swagger.getPaths().keySet()) {
@@ -53,17 +63,6 @@ public class SwaggerResolver {
                 }
             }
         }
-
-        if(swagger.getResponses() != null) {
-            for(String responseCode : swagger.getResponses().keySet()) {
-                Response response = swagger.getResponses().get(responseCode);
-                if(response.getSchema() != null) {
-                    propertyProcessor.processProperty(response.getSchema());
-                }
-            }
-        }
-
-        definitionsProcessor.processDefinitions();
 
         return swagger;
     }
