@@ -292,7 +292,7 @@ public class SwaggerParserTest {
     }
 
     @Test
-    public void testLoadXResponsesReferenceToExternalDef() {
+    public void testLoadResponsesReferenceToExternalDef() {
         SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read("src/test/resources/vendor-extensions-references/a.yaml");
         Map<String, Response> responses = swagger.getResponses();
@@ -327,6 +327,42 @@ public class SwaggerParserTest {
         Map<String, Model> definitions = swagger.getDefinitions();
         assertTrue(definitions.containsKey("z"));
         assertTrue(definitions.containsKey("w"));
+    }
+
+    @Test
+    public void testLoadSectionsReference() {
+        SwaggerParser parser = new SwaggerParser();
+        Swagger swagger = parser.read("src/test/resources/section-references/b.yaml");
+        Map<String, Model> definitions = swagger.getDefinitions();
+        assertTrue(definitions.containsKey("x"));
+        Map<String, Response> responses = swagger.getResponses();
+        assertTrue(responses.containsKey("400"));
+        Map<String, Path> paths = swagger.getPaths();
+        assertTrue(paths.containsKey("/foo"));
+    }
+
+    @Test
+    public void testLoadSectionsFileReference() {
+        SwaggerParser parser = new SwaggerParser();
+        Swagger swagger = parser.read("src/test/resources/section-references/b2.yaml");
+        Map<String, Model> definitions = swagger.getDefinitions();
+        assertTrue(definitions.containsKey("x"));
+        Map<String, Response> responses = swagger.getResponses();
+        assertTrue(responses.containsKey("400"));
+        Map<String, Path> paths = swagger.getPaths();
+        assertTrue(paths.containsKey("/foo"));
+    }
+
+    @Test
+    public void testLoadNestedSectionsReference() {
+        SwaggerParser parser = new SwaggerParser();
+        Swagger swagger = parser.read("src/test/resources/section-references/c.yaml");
+        Map<String, Model> definitions = swagger.getDefinitions();
+        assertTrue(definitions.containsKey("x"));
+        Map<String, Response> responses = swagger.getResponses();
+        assertTrue(responses.containsKey("400"));
+        Map<String, Path> paths = swagger.getPaths();
+        assertTrue(paths.containsKey("/foo"));
     }
 
     @Test
