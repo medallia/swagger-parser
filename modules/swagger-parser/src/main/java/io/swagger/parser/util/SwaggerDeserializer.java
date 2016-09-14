@@ -911,7 +911,20 @@ public class SwaggerDeserializer {
                 }
             }
         }
-        return Json.mapper().convertValue(node, Property.class);
+        Property p = Json.mapper().convertValue(node, Property.class);
+        
+        if (node.has("readOnly")) {
+        	p.setReadOnly(node.get("readOnly").asBoolean());
+        }
+        
+        Set<String> keys = getKeys(node);
+        for(String key : keys) {
+            if(key.startsWith("x-")) {
+                p.getVendorExtensions().put(key, extension(node.get(key)));
+            }
+        }
+        
+        return p;
     }
 
     public String inferTypeFromArray(ArrayNode an) {
