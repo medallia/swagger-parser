@@ -3,11 +3,7 @@ package io.swagger.parser;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.models.*;
 import io.swagger.models.parameters.*;
-import io.swagger.models.properties.ArrayProperty;
-import io.swagger.models.properties.ByteArrayProperty;
-import io.swagger.models.properties.MapProperty;
-import io.swagger.models.properties.RefProperty;
-import io.swagger.models.properties.StringProperty;
+import io.swagger.models.properties.*;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
@@ -20,8 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 
 public class SwaggerParserTest {
@@ -244,54 +239,6 @@ public class SwaggerParserTest {
     }
 
     @Test
-    public void testLoadExternalXCollection() throws Exception {
-        SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/vendor-extensions-references/b.yaml");
-        Map<String, Model> definitions = swagger.getDefinitions();
-        assertTrue(definitions.containsKey("x"));
-        assertTrue(!definitions.containsKey("y"));
-        assertTrue(definitions.containsKey("z"));
-        assertEquals(((ObjectNode) definitions.get("u").getVendorExtensions().get("x-collection")).get("schema").get("$ref").asText(), "#/definitions/t");
-        assertEquals(definitions.get("z").getVendorExtensions().get("x-pointer"), "./a.yaml#/definitions/z");
-        assertEquals(definitions.get("u").getVendorExtensions().get("x-pointer"), "./a.yaml#/definitions/s");
-        assertEquals(definitions.get("x").getVendorExtensions().get("x-pointer"), "./a.yaml#/definitions/y");
-    }
-
-    @Test
-    public void testLoadExternalXLinks() throws Exception {
-        SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/vendor-extensions-references/b.yaml");
-        Map<String, Model> definitions = swagger.getDefinitions();
-        assertTrue(definitions.containsKey("n"));
-        assertTrue(!definitions.containsKey("m"));
-        assertTrue(definitions.containsKey("p"));
-        assertTrue(definitions.containsKey("r"));
-        assertEquals(((ObjectNode) definitions.get("n").getVendorExtensions().get("x-links")).get("q").get("schema").get("$ref").asText(), "#/definitions/r");
-        assertEquals(definitions.get("p").getVendorExtensions().get("x-pointer"), "./a.yaml#/definitions/p");
-        assertEquals(definitions.get("n").getVendorExtensions().get("x-pointer"), "./a.yaml#/definitions/m");
-    }
-
-    @Test
-    public void testLoadXCollectionToExternalDef() throws Exception {
-        SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/vendor-extensions-references/a.yaml");
-        Map<String, Model> definitions = swagger.getDefinitions();
-        assertTrue(definitions.containsKey("t"));
-        assertEquals(((ObjectNode) definitions.get("s").getVendorExtensions().get("x-collection")).get("schema").get("$ref").asText(), "#/definitions/t");
-        assertEquals(definitions.get("t").getVendorExtensions().get("x-pointer"), "./b.yaml#/definitions/t");
-    }
-
-    @Test
-    public void testLoadXLinksToExternalDef() throws Exception {
-        SwaggerParser parser = new SwaggerParser();
-        final Swagger swagger = parser.read("src/test/resources/vendor-extensions-references/a.yaml");
-        Map<String, Model> definitions = swagger.getDefinitions();
-        assertTrue(definitions.containsKey("r"));
-        assertEquals(((ObjectNode) definitions.get("m").getVendorExtensions().get("x-links")).get("q").get("schema").get("$ref").asText(), "#/definitions/r");
-        assertEquals(definitions.get("r").getVendorExtensions().get("x-pointer"), "./b.yaml#/definitions/r");
-    }
-
-    @Test
     public void testLoadResponsesReferenceToExternalDef() {
         SwaggerParser parser = new SwaggerParser();
         final Swagger swagger = parser.read("src/test/resources/vendor-extensions-references/a.yaml");
@@ -312,6 +259,42 @@ public class SwaggerParserTest {
         assertNotNull(definitions.get("e"));
         assertNotNull(definitions.get("e").getVendorExtensions().get("x-pointer"));
         assertEquals(definitions.get("e").getVendorExtensions().get("x-pointer"), "./b.yaml#/definitions/e");
+    }
+
+    @Test
+    public void testLoadExternalVendorExtensions() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        Swagger swagger = parser.read("src/test/resources/vendor-extensions-references/b.yaml");
+        Map<String, Model> definitions = swagger.getDefinitions();
+        assertTrue(definitions.containsKey("x"));
+        assertTrue(!definitions.containsKey("y"));
+        assertTrue(definitions.containsKey("z"));
+        assertEquals(((ObjectNode) definitions.get("u").getVendorExtensions().get("x-collection")).get("schema").get("$ref").asText(), "#/definitions/t");
+        assertEquals(definitions.get("z").getVendorExtensions().get("x-pointer"), "./a.yaml#/definitions/z");
+        assertEquals(definitions.get("u").getVendorExtensions().get("x-pointer"), "./a.yaml#/definitions/s");
+        assertEquals(definitions.get("x").getVendorExtensions().get("x-pointer"), "./a.yaml#/definitions/y");
+
+        assertTrue(definitions.containsKey("n"));
+        assertTrue(!definitions.containsKey("m"));
+        assertTrue(definitions.containsKey("p"));
+        assertTrue(definitions.containsKey("r"));
+        assertEquals(((ObjectNode) definitions.get("n").getVendorExtensions().get("x-links")).get("q").get("schema").get("$ref").asText(), "#/definitions/r");
+        assertEquals(definitions.get("p").getVendorExtensions().get("x-pointer"), "./a.yaml#/definitions/p");
+        assertEquals(definitions.get("n").getVendorExtensions().get("x-pointer"), "./a.yaml#/definitions/m");
+    }
+
+    @Test
+    public void testLoadVendorExtensionsToExternalDef() throws Exception {
+        SwaggerParser parser = new SwaggerParser();
+        final Swagger swagger = parser.read("src/test/resources/vendor-extensions-references/a.yaml");
+        Map<String, Model> definitions = swagger.getDefinitions();
+        assertTrue(definitions.containsKey("t"));
+        assertEquals(((ObjectNode) definitions.get("s").getVendorExtensions().get("x-collection")).get("schema").get("$ref").asText(), "#/definitions/t");
+        assertEquals(definitions.get("t").getVendorExtensions().get("x-pointer"), "./b.yaml#/definitions/t");
+
+        assertTrue(definitions.containsKey("r"));
+        assertEquals(((ObjectNode) definitions.get("m").getVendorExtensions().get("x-links")).get("q").get("schema").get("$ref").asText(), "#/definitions/r");
+        assertEquals(definitions.get("r").getVendorExtensions().get("x-pointer"), "./b.yaml#/definitions/r");
     }
 
     @Test
@@ -471,12 +454,83 @@ public class SwaggerParserTest {
     }
 
     @Test
+    public void testIssue292WithNoCollectionFormat() {
+        String yaml =
+                "swagger: '2.0'\n" +
+                "info:\n" +
+                "  version: '0.0.0'\n" +
+                "  title: nada\n" +
+                "paths:\n" +
+                "  /persons:\n" +
+                "    get:\n" +
+                "      parameters:\n" +
+                "      - name: testParam\n" +
+                "        in: query\n" +
+                "        type: array\n" +
+                "        items:\n" +
+                "          type: string\n" +
+                "      responses:\n" +
+                "        200:\n" +
+                "          description: Successful response";
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+
+        Swagger swagger = result.getSwagger();
+
+        Parameter param = swagger.getPaths().get("/persons").getGet().getParameters().get(0);
+        QueryParameter qp = (QueryParameter) param;
+        assertNull(qp.getCollectionFormat());
+    }
+
+    @Test
+    public void testIssue292WithCSVCollectionFormat() {
+        String yaml =
+                "swagger: '2.0'\n" +
+                        "info:\n" +
+                        "  version: '0.0.0'\n" +
+                        "  title: nada\n" +
+                        "paths:\n" +
+                        "  /persons:\n" +
+                        "    get:\n" +
+                        "      parameters:\n" +
+                        "      - name: testParam\n" +
+                        "        in: query\n" +
+                        "        type: array\n" +
+                        "        items:\n" +
+                        "          type: string\n" +
+                        "        collectionFormat: csv\n" +
+                        "      responses:\n" +
+                        "        200:\n" +
+                        "          description: Successful response";
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult result = parser.readWithInfo(yaml);
+
+        Swagger swagger = result.getSwagger();
+
+        Parameter param = swagger.getPaths().get("/persons").getGet().getParameters().get(0);
+        QueryParameter qp = (QueryParameter) param;
+        assertEquals(qp.getCollectionFormat(), "csv");
+    }
+
+    @Test
     public void testIssue255() {
         SwaggerParser parser = new SwaggerParser();
 
         Swagger swagger = parser.read("objectExample.json");
         assertEquals(swagger.getDefinitions().get("SamplePayload").getExample(), "[{\"op\":\"replace\",\"path\":\"/s\",\"v\":\"w\"}]");
     }
+
+    @Test
+    public void testIssue286() {
+        SwaggerParser parser = new SwaggerParser();
+
+        Swagger swagger = parser.read("issue_286.yaml");
+        Property response = swagger.getPath("/").getGet().getResponses().get("200").getSchema();
+        assertTrue(response instanceof RefProperty);
+        assertEquals(((RefProperty)response).getSimpleRef(), "issue_286_PetList");
+        assertNotNull(swagger.getDefinitions().get("issue_286_Allergy"));
+    }
+
 
     private Swagger doRelativeFileTest(String location) {
         SwaggerParser parser = new SwaggerParser();

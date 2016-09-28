@@ -24,7 +24,7 @@ definitions:
         schema: 
           $ref: "#/definitions/p"
       q:
-        schema: 
+        schema:
           $ref: "./b.yaml#/definitions/r"
   p:
     type: object
