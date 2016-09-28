@@ -4,6 +4,8 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.swagger/swagger-parser-project/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/io.swagger/swagger-parser-project)
 [![PR Stats](http://issuestats.com/github/swagger-api/swagger-parser/badge/pr)](http://issuestats.com/github/swagger-api/swagger-parser) [![Issue Stats](http://issuestats.com/github/swagger-api/swagger-parser/badge/issue)](http://issuestats.com/github/swagger-api/swagger-parser)
 
+## Collaboration guidelines for Medallia's fork
+[Read here](https://github.medallia.com/medallia/api-codegen#collaboration-guidelines).
 
 ## Overview 
 This is the swagger parser project, which reads OpenAPI Specifications into current Java POJOs.  It also provides a simple framework to add additional converters from different formats into the Swagger objects, making the entire toolchain available.
