@@ -4,14 +4,15 @@ import static io.swagger.parser.util.RefUtils.isAnExternalRefFormat;
 
 import java.util.Iterator;
 import java.util.Map;
-
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import io.swagger.models.Model;
-import io.swagger.models.refs.GenericRef;
 import io.swagger.models.refs.RefFormat;
-import io.swagger.models.refs.RefType;
 import io.swagger.parser.ResolverCache;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.JsonNode;
 
 public class VendorExtensionProcessor {
 	
@@ -22,44 +23,52 @@ public class VendorExtensionProcessor {
 		this.externalRefProcessor = externalRefProcessor;
 		this.cache = cache;
 	}
-	
+
+    // Copied from GenericRef::computeRefFormat
+    private static RefFormat computeRefFormat(String ref) {
+        RefFormat result = RefFormat.INTERNAL;
+        if (ref.startsWith("http")) {
+            result = RefFormat.URL;
+        } else if (ref.startsWith("#/")) {
+            result = RefFormat.INTERNAL;
+        } else if (ref.startsWith(".") || ref.startsWith("/")) {
+            result = RefFormat.RELATIVE;
+        }
+
+        return result;
+    }
+
+    private void processRefsRecursively(Object node, String externalFile) {
+	    if (node != null && node instanceof ObjectNode) {
+	        ObjectNode objectNode = (ObjectNode) node;
+            if (objectNode.has("$ref")) {
+                String ref = objectNode.get("$ref").asText();
+                RefFormat refFormat = computeRefFormat(ref);
+                if (isAnExternalRefFormat(refFormat)) {
+                    Pattern pattern = Pattern.compile("(#/[^/]+/)");
+                    Matcher matcher = pattern.matcher(ref);
+                    if (!matcher.find()) {
+                        throw new RuntimeException("Unable to infer ref type: " + ref);
+                    }
+                    String refType = matcher.group(0);
+                    objectNode.put("$ref", refType + externalRefProcessor.processRefToExternalDefinition(ref, refFormat));
+                } else if (externalFile != null) {
+                    externalRefProcessor.processRefToExternalDefinition(externalFile + ref, RefFormat.RELATIVE);
+                }
+            } else {
+                Iterator<JsonNode> it = objectNode.elements();
+                while (it.hasNext()) {
+                    processRefsRecursively(it.next(), externalFile);
+                }
+            }
+        }
+    }
+
 	public void processRefsFromVendorExtensions(Model model, String externalFile) {
         Map<String, Object> vendorExtensions = model.getVendorExtensions();
         if (vendorExtensions != null) {
-            if (vendorExtensions.containsKey("x-collection")) {
-                ObjectNode xCollection = (ObjectNode) vendorExtensions.get("x-collection");
-                if (xCollection.has("schema") && xCollection.get("schema").has("$ref")) {
-                    String sub$ref = xCollection.get("schema").get("$ref").asText();
-                    GenericRef subRef = new GenericRef(RefType.DEFINITION, sub$ref);
-                    if (isAnExternalRefFormat(subRef.getFormat())) {
-                    	((ObjectNode) xCollection.get("schema")).put("$ref", "#/definitions/" + externalRefProcessor.processRefToExternalDefinition(subRef.getRef(), subRef.getFormat()));
-                    } else if (externalFile != null) {
-                    	externalRefProcessor.processRefToExternalDefinition(externalFile + subRef.getRef(), RefFormat.RELATIVE);
-                    } else {
-                    	cache.checkInternalRef(subRef.getRef());
-                    }
-                }
-            }
-            if (vendorExtensions.containsKey("x-links")) {
-                ObjectNode xLinks = (ObjectNode) vendorExtensions.get("x-links");
-                Iterator<String> xLinksNames = xLinks.fieldNames();
-                while (xLinksNames.hasNext()) {
-                    String linkName = xLinksNames.next();
-                    if (xLinks.get(linkName) instanceof ObjectNode) {
-                        ObjectNode xLink = (ObjectNode) xLinks.get(linkName);
-                        if (xLink.has("schema") && xLink.get("schema").has("$ref")) {
-                            String sub$ref = xLink.get("schema").get("$ref").asText();
-                            GenericRef subRef = new GenericRef(RefType.DEFINITION, sub$ref);
-                            if (isAnExternalRefFormat(subRef.getFormat())) {
-                                ((ObjectNode) xLink.get("schema")).put("$ref", "#/definitions/" + externalRefProcessor.processRefToExternalDefinition(subRef.getRef(), subRef.getFormat()));
-                            } else if (externalFile != null) {
-                            	externalRefProcessor.processRefToExternalDefinition(externalFile + subRef.getRef(), RefFormat.RELATIVE);
-                            } else {
-                            	cache.checkInternalRef(subRef.getRef());
-                            } 
-                        }
-                    }
-                }
+            for (Map.Entry<String, Object> entry : vendorExtensions.entrySet()) {
+                processRefsRecursively(entry.getValue(), externalFile);
             }
         }
     }

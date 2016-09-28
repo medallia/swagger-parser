@@ -23,7 +23,7 @@ public final class ExternalRefProcessor {
 
     private final ResolverCache cache;
     private final Swagger swagger;
-    
+
     private VendorExtensionProcessor vendorExtensionProcessor;
 
     public ExternalRefProcessor(ResolverCache cache, Swagger swagger) {
@@ -112,5 +112,4 @@ public final class ExternalRefProcessor {
             processRefToExternalDefinition(externalFile + subRef.get$ref(), RefFormat.RELATIVE);
         }
     }
-
 }
