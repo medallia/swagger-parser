@@ -54,6 +54,8 @@ public class VendorExtensionProcessor {
                     objectNode.put("$ref", refType + externalRefProcessor.processRefToExternalDefinition(ref, refFormat));
                 } else if (externalFile != null) {
                     externalRefProcessor.processRefToExternalDefinition(externalFile + ref, RefFormat.RELATIVE);
+                } else {
+                    cache.checkInternalRef(ref);
                 }
             } else {
                 Iterator<JsonNode> it = objectNode.elements();
