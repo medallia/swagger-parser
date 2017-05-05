@@ -1,3 +1,6 @@
+# WARNING: Don't use this repo. 
+# Use https://github.medallia.com/medallia/swagger-parser instead
+
 # Swagger Parser
 
 [![Build Status](https://travis-ci.org/swagger-api/swagger-parser.svg)](https://travis-ci.org/swagger-api/swagger-parser)
